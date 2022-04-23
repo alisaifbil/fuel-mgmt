@@ -9,11 +9,29 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 function App () 
  {
 
-  const [value, setValue] = React.useState(new Date());
+  const [currentDate, setDate] = React.useState(new Date());
+  // const [vehicle, setVehicle] = React.useState();
+  const [amount, setAmount] = React.useState("");
+  const [mileage, setMileage] = React.useState("");
+  const [fuel, setFuel] = React.useState("");
   
-  const handleChange = (newValue) => {
-    setValue(newValue);
+  const handleDateChange = (newValue) => {
+    setDate(newValue);
   };
+
+  const handleAmountChange = (event) => {
+    setAmount(event.target.value);
+  }
+  const handleMileageChange = (event) => {
+    setMileage(event.target.value);
+  }
+  const handleFuelChange = (event) => {
+    setFuel(event.target.value);
+  }
+
+  const handleClick = () => {
+    console.log(currentDate.toISOString() + "--" + amount + "--" + mileage + "--" + fuel);
+  }
   
   return (
     <div >
@@ -27,8 +45,8 @@ function App ()
               <MobileDatePicker
               label="Date mobile"
               inputFormat="MM/dd/yyyy"
-              value={value}
-              onChange={handleChange}
+              value={currentDate}
+              onChange={handleDateChange}
               renderInput={(params) => <TextField {...params} />}
               />
             </LocalizationProvider>
@@ -45,16 +63,16 @@ function App ()
             </FormControl>       
           </Grid>
           <Grid container item xs={12} justifyContent='center'>
-            <TextField id="outlined-basic" label="Total Amount" variant="outlined" />
+            <TextField id="outlined-basic" value={amount} onChange={handleAmountChange} label="Total Amount" variant="outlined" />
           </Grid>
           <Grid container item xs={12} justifyContent='center'>
-            <TextField id="kms" label="Mileage" variant="outlined" />
+            <TextField id="kms" label="Mileage" variant="outlined" value={mileage} onChange={handleMileageChange} />
           </Grid>
           <Grid container item xs={12} justifyContent='center'>
-            <TextField id="litres" label="Fuel (Litres)" variant="outlined" />
+            <TextField id="litres" label="Fuel (Litres)" variant="outlined" value={fuel} onChange={handleFuelChange} />
           </Grid>
           <Grid container item xs={12} justifyContent='center'>
-            <Button variant="contained">SUBMIT</Button>
+            <Button onClick={handleClick} variant="contained">SUBMIT</Button>
           </Grid>
           
         </Grid>
