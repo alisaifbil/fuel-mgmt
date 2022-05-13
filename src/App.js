@@ -2,7 +2,7 @@
 import React from 'react';
 import './App.css';
 import { Container, Grid, Typography, Radio, RadioGroup,
-   FormControl , FormControlLabel , FormLabel, TextField, Button   } from '@mui/material';
+   FormControl , FormControlLabel , FormLabel, TextField, Button, InputLabel, Select, MenuItem } from '@mui/material';
 import { MobileDatePicker, LocalizationProvider  } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
@@ -14,23 +14,28 @@ function App ()
   const [amount, setAmount] = React.useState("");
   const [mileage, setMileage] = React.useState("");
   const [fuel, setFuel] = React.useState("");
+  const [car, setCar] = React.useState("");
   
   const handleDateChange = (newValue) => {
     setDate(newValue);
   };
 
   const handleAmountChange = (event) => {
-    setAmount(event.target.value);
+    isNaN(Number(event.target.value)) === true ? setAmount(amount) : setAmount(event.target.value);
   }
   const handleMileageChange = (event) => {
-    setMileage(event.target.value);
+    isNaN(Number(event.target.value)) === true ? setMileage(mileage) : setMileage(event.target.value);
   }
   const handleFuelChange = (event) => {
-    setFuel(event.target.value);
+    isNaN(Number(event.target.value)) === true ? setFuel(fuel) : setFuel(event.target.value);
   }
 
   const handleClick = () => {
-    console.log(currentDate.toISOString() + "--" + amount + "--" + mileage + "--" + fuel);
+      console.log(currentDate.toISOString() + "--" + amount + "--" + mileage + "--" + fuel + "--" + car);
+  }
+
+  const handleCarChange = (event) => {
+    setCar(event.target.value);
   }
   
   return (
@@ -52,18 +57,26 @@ function App ()
             </LocalizationProvider>
           </Grid>
           <Grid container item xs={12} justifyContent='center'>
-            <FormControl >
-              <FormLabel style={{alignSelf: 'center'}}>Vehicle</FormLabel>
-                <RadioGroup row>
-                  <FormControlLabel value="civic" control={<Radio />} label="Civic" />
-                  <FormControlLabel value="wagonr" control={<Radio />} label="Wagon R" />
-                  <FormControlLabel value="ybr" control={<Radio />} label="YBR" />
-                  <FormControlLabel value="unique" control={<Radio />} label="Unique-70" />
-                </RadioGroup>  
+            <FormControl style={{minWidth: 150}} >  
+              <InputLabel id="demo-simple-select-label">Vehicle</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={car}
+                label="Age"
+                onChange={handleCarChange}
+                variant='outlined'
+              >
+                <MenuItem value={'civic'}>Civic</MenuItem>
+                <MenuItem value={'wagonr'}>Wagon-R</MenuItem>
+                <MenuItem value={'ybr'}>YBR</MenuItem>
+                <MenuItem value={'unique'}>Unique-70</MenuItem>
+              </Select> 
             </FormControl>       
           </Grid>
           <Grid container item xs={12} justifyContent='center'>
-            <TextField id="outlined-basic" value={amount} onChange={handleAmountChange} label="Total Amount" variant="outlined" />
+            <TextField id="outlined-basic" value={amount} inputProps={{ inputMode: 'numeric', pattern:'([0-9]+)?[,\\.]?[0-9]*'}}
+            onChange={handleAmountChange} label="Total Amount" variant="outlined" />
           </Grid>
           <Grid container item xs={12} justifyContent='center'>
             <TextField id="kms" label="Mileage" variant="outlined" value={mileage} onChange={handleMileageChange} />
