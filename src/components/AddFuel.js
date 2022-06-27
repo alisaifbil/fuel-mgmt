@@ -1,6 +1,8 @@
 import React, {useEffect} from 'react';
 import { Container, Grid, Typography, Radio, RadioGroup,
-    FormControl , FormControlLabel , FormLabel, TextField, Button, InputLabel, Select, MenuItem } from '@mui/material';
+    FormControl , FormControlLabel , FormLabel, 
+    TextField, Button, InputLabel, Select, MenuItem, 
+  Alert, Stack } from '@mui/material';
 import { MobileDatePicker, LocalizationProvider  } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import firebase from 'firebase/compat/app';
@@ -16,13 +18,12 @@ function AddFuel ()
   const [mileage, setMileage] = React.useState("");
   const [fuelLitres, setFuel] = React.useState("");
   const [car, setCar] = React.useState("");
+  const [showAlert, setAlert] = React.useState(false);
   
   useEffect(() => {
-    // fuelLitres: '2719', car: 'wagonr'
-    // car: 'wagonr', fuelLitres: '18545',
 
     // db.collection("fillingRecord")
-    // .doc('FJABCeV9nZfSavvNTod1')
+    // .doc('9sM717XzHyA8J38NW7qE')
     // .delete()
     // .then(() => {
     //   console.log("deleted");
@@ -30,6 +31,7 @@ function AddFuel ()
     // .catch((error) => {
     //   console.log("not deleted====",error);
     // })
+
     let countArr = [];
     db.collection("fillingRecord").get().then((querySnapshot) => {
         querySnapshot.forEach((doc) => {
@@ -61,7 +63,6 @@ function AddFuel ()
               }
             });
           }
-            // console.log(Number(doc.data().mileage) == 16608? doc.data() : "not found");
         });
         console.log(countArr);
     })
@@ -94,6 +95,7 @@ function AddFuel ()
       })
       .then(() => {
         console.log("Value successfully written!");
+        setAlert(true);
       })
       .catch((error) => {
         console.error("Error writing Value: ", error);
@@ -110,6 +112,11 @@ function AddFuel ()
     <div >
       <Container  >
         <Grid container spacing={2}>
+          {showAlert? 
+          <Stack sx={{ width: '100%' }} spacing={2}>
+           <Alert severity="success">This is a success alert — check it out!</Alert>
+          </Stack>:
+          ""}
           <Grid item xs={12}>
             <Typography align="center" variant='h3'>Vehicle's Fuel Management</Typography>
           </Grid>
