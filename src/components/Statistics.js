@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, { useEffect } from 'react';
 import { Container, Grid, Typography, Radio, RadioGroup,
     FormControl , FormControlLabel , FormLabel, TextField, Button, InputLabel, Select, MenuItem } from '@mui/material';
 import { MobileDatePicker, LocalizationProvider  } from '@mui/x-date-pickers';
@@ -7,7 +7,7 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/firestore';
 
-function AddFuel () 
+function Statistics () 
  {
   const db = firebase.firestore();
   const [currentDate, setDate] = React.useState(new Date());
@@ -16,6 +16,7 @@ function AddFuel ()
   const [mileage, setMileage] = React.useState("");
   const [fuelLitres, setFuel] = React.useState("");
   const [car, setCar] = React.useState("");
+  const [carRefills, setCarRefills] = React.useState([]);
   
   useEffect(() => {
     // fuelLitres: '2719', car: 'wagonr'
@@ -33,37 +34,9 @@ function AddFuel ()
     let countArr = [];
     db.collection("fillingRecord").get().then((querySnapshot) => {
         querySnapshot.forEach((doc) => {
-          if(countArr.length < 1) {
-            countArr.push({car: doc.data().car, 
-              count: 1, 
-              amount: Number(amount),
-              fuelLitres: Number(fuelLitres),
-              mileage: Number(mileage)
-            });
-          }
-          else {
-            countArr.forEach(val => {
-              if(val.car === doc.data().car){
-                val.count++;
-                val.amount += Number(doc.data().amount);
-                val.fuelLitres += Number(doc.data().fuelLitres);
-                val.mileage <= Number(doc.data().mileage) ? val.mileage = Number(doc.data().mileage) : val.mileage = val.mileage;
-                }
-              else {
-                if(countArr.findIndex(val => val.car === doc.data().car) === -1){
-                  countArr.push({car: doc.data().car, 
-                    count: 1, 
-                    amount: Number(amount),
-                    fuelLitres: Number(fuelLitres),
-                    mileage: Number(mileage)
-                  });
-                }
-              }
-            });
-          }
-            // console.log(Number(doc.data().mileage) == 16608? doc.data() : "not found");
-        });
-        console.log(countArr);
+            
+            console.log(Number(doc.data().mileage) == 16608? doc.data() : "not found");
+        })
     })
 
   }, []);
@@ -162,4 +135,4 @@ function AddFuel ()
   );
  }
 
- export default AddFuel;
+ export default Statistics;
