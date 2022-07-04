@@ -1,6 +1,20 @@
 import React, { useEffect } from 'react';
+import React, {useEffect} from 'react';
 import { Container, Grid, Typography, Radio, RadioGroup,
-    FormControl , FormControlLabel , FormLabel, TextField, Button, InputLabel, Select, MenuItem } from '@mui/material';
+    FormControl , FormControlLabel , FormLabel, 
+    TextField, Button, InputLabel, Select, MenuItem, 
+  Alert, Paper, Stack, Divider, Chip, IconButton, Card,
+  CardHeader, Avatar, CardMedia, CardContent,CardActions,
+  Collapse, Fab } from '@mui/material';
+import { styled } from '@mui/material/styles';
+import { red } from '@mui/material/colors';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import ShareIcon from '@mui/icons-material/Share';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import NavigationIcon from '@mui/icons-material/Navigation';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import { MobileDatePicker, LocalizationProvider  } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import firebase from 'firebase/compat/app';
@@ -17,13 +31,13 @@ function Statistics ()
   const [fuelLitres, setFuel] = React.useState("");
   const [car, setCar] = React.useState("");
   const [carRefills, setCarRefills] = React.useState([]);
+  const [monthlyCount, setMonthlyCount] = React.useState([]);
+  const [monthlyDiff, setMonthlyDiff] = React.useState([]);
   
   useEffect(() => {
-    // fuelLitres: '2719', car: 'wagonr'
-    // car: 'wagonr', fuelLitres: '18545',
 
     // db.collection("fillingRecord")
-    // .doc('FJABCeV9nZfSavvNTod1')
+    // .doc('9sM717XzHyA8J38NW7qE')
     // .delete()
     // .then(() => {
     //   console.log("deleted");
@@ -31,12 +45,79 @@ function Statistics ()
     // .catch((error) => {
     //   console.log("not deleted====",error);
     // })
+
     let countArr = [];
+    let prevMonth = [];
+    let diffMoM = [];
     db.collection("fillingRecord").get().then((querySnapshot) => {
         querySnapshot.forEach((doc) => {
-            
-            console.log(Number(doc.data().mileage) == 16608? doc.data() : "not found");
-        })
+          // console.log(new Date(doc.data().date.seconds * 1000).getMonth(), "---", doc.data());
+          
+          if(countArr.length < 1 && new Date(doc.data().date.seconds * 1000).getMonth() === 5 && new Date(doc.data().date.seconds * 1000).getFullYear() === 2022) {
+            countArr.push({car: doc.data().car, 
+              count: 1, 
+              amount: Number(doc.data().amount),
+              fuelLitres: Number(doc.data().fuelLitres),
+              mileage: Number(doc.data().mileage)
+            });
+          }
+          else {
+            countArr.forEach(val => {
+              if(val.car === doc.data().car && new Date(doc.data().date.seconds * 1000).getMonth() === 5 && new Date(doc.data().date.seconds * 1000).getFullYear() === 2022){
+                val.count++;
+                val.amount += Number(doc.data().amount);
+                val.fuelLitres += Number(doc.data().fuelLitres);
+                val.mileage <= Number(doc.data().mileage) ? val.mileage = Number(doc.data().mileage) : val.mileage = val.mileage;
+                }
+              else {
+                if(countArr.findIndex(val => val.car === doc.data().car) === -1 && new Date(doc.data().date.seconds * 1000).getMonth() === 5 && new Date(doc.data().date.seconds * 1000).getFullYear() === 2022){
+                  countArr.push({car: doc.data().car, 
+                    count: 1, 
+                    amount: Number(doc.data().amount),
+                    fuelLitres: Number(doc.data().fuelLitres),
+                    mileage: Number(doc.data().mileage)
+                  });
+                }
+              }
+            });
+          }
+
+          if(prevMonth.length < 1 && new Date(doc.data().date.seconds * 1000).getMonth() === 4 && new Date(doc.data().date.seconds * 1000).getFullYear() === 2022) {
+            prevMonth.push({car: doc.data().car, 
+              fuelLitres: Number(doc.data().fuelLitres),
+            });
+          }
+          else {
+            prevMonth.forEach(val => {
+              if(val.car === doc.data().car && new Date(doc.data().date.seconds * 1000).getMonth() === 4 && new Date(doc.data().date.seconds * 1000).getFullYear() === 2022){
+                val.fuelLitres += Number(doc.data().fuelLitres);
+                }
+              else {
+                if(prevMonth.findIndex(val => val.car === doc.data().car) === -1 && new Date(doc.data().date.seconds * 1000).getMonth() === 4 && new Date(doc.data().date.seconds * 1000).getFullYear() === 2022){
+                  prevMonth.push({car: doc.data().car, 
+                    fuelLitres: Number(doc.data().fuelLitres),
+                  });
+                }
+              }
+            });
+          }
+        });
+        countArr.map(stat => {
+          prevMonth.map(pStat => {
+            if(stat.car === pStat.car){
+              diffMoM.push({
+                car: stat.car,
+                pcDiff: ((stat.fuelLitres/pStat.fuelLitres)*100)-100
+              });
+            }
+          });
+        });
+        
+        console.log(countArr);
+        console.log('prev month',prevMonth);
+        console.log('pc',diffMoM);
+        setMonthlyDiff(diffMoM);
+        setMonthlyCount(countArr);
     })
 
   }, []);
@@ -83,50 +164,59 @@ function Statistics ()
     <div >
       <Container  >
         <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Typography align="center" variant='h3'>Vehicle's Fuel Management</Typography>
-          </Grid>
-          <Grid container item xs={12} justifyContent='center'>
-            <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <MobileDatePicker
-              label="Date mobile"
-              inputFormat="MM/dd/yyyy"
-              value={currentDate}
-              onChange={handleDateChange}
-              renderInput={(params) => <TextField {...params} />}
-              />
-            </LocalizationProvider>
-          </Grid>
-          <Grid container item xs={12} justifyContent='center'>
-            <FormControl style={{minWidth: 150}} >  
-              <InputLabel id="demo-simple-select-label">Vehicle</InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={car}
-                label="Age"
-                onChange={handleCarChange}
-                variant='outlined'
+        <Grid container item xs={12} direction='row' justifyContent="center" alignItems="center">
+          
+          {monthlyCount.map((val, index) => (
+            <Card raised sx={{ maxWidth: 345 }} style={{margin: '10px'}}>
+            <CardHeader
+              avatar={
+                <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
+                  {val.car.substring(0,1).toUpperCase()}
+                </Avatar>
+              }
+              title={val.car === 'wagonr'? "Suzuki Wagon-R": val.car === 'civic'? 'Honda Civic':
+              val.car === 'ybr'? 'YBR-G':'Unique CD-70'}
+              subheader= {val.count + ' Monthly Refills'} 
+            />
+            <CardActions disableSpacing>
+              
+              {monthlyDiff[monthlyDiff.findIndex(mdg => mdg.car === val.car)].pcDiff > 0?
+              (<Fab variant="extended" disabled size='medium' style={{color: 'black' , backgroundColor: 'white'}}>
+                <ArrowUpwardIcon color='error' sx={{ mr: 1 }} />
+                {Math.abs(monthlyDiff[monthlyDiff.findIndex(mdg => mdg.car === val.car)].pcDiff).toFixed(2)} %
+              </Fab>):
+              (
+              <Fab variant="extended" disabled size='medium' style={{color: 'black' , backgroundColor: 'white'}}>
+                <ArrowDownwardIcon color='success' sx={{ mr: 1 }} />
+                {Math.abs(monthlyDiff[monthlyDiff.findIndex(mdg => mdg.car === val.car)].pcDiff).toFixed(2)} %
+              </Fab>)  
+            }
+            <ExpandMore
+                expand={expanded}
+                onClick={handleExpandClick}
+                aria-expanded={expanded}
+                aria-label="show more"
               >
-                <MenuItem value={'civic'}>Civic</MenuItem>
-                <MenuItem value={'wagonr'}>Wagon-R</MenuItem>
-                <MenuItem value={'ybr'}>YBR</MenuItem>
-                <MenuItem value={'unique'}>Unique-70</MenuItem>
-              </Select> 
-            </FormControl>       
-          </Grid>
-          <Grid container item xs={12} justifyContent='center'>
-            <TextField id="outlined-basic" value={amount} inputProps={{ inputMode: 'numeric', pattern:'([0-9]+)?[,\\.]?[0-9]*'}}
-            onChange={handleAmountChange} label="Total Amount" variant="outlined" />
-          </Grid>
-          <Grid container item xs={12} justifyContent='center'>
-            <TextField id="kms" label="Mileage" variant="outlined" value={mileage} onChange={handleMileageChange} />
-          </Grid>
-          <Grid container item xs={12} justifyContent='center'>
-            <TextField id="litres" label="Fuel (Litres)" variant="outlined" value={fuelLitres} onChange={handleFuelChange} />
-          </Grid>
-          <Grid container item xs={12} justifyContent='center'>
-            <Button onClick={handleClick} variant="contained">SUBMIT</Button>
+                <ExpandMoreIcon />
+              </ExpandMore>
+            </CardActions>
+            <Collapse in={expanded} timeout="auto" unmountOnExit>
+              <CardContent>
+                <Typography variant='subtitle1'>
+                  Rs. {val.amount}
+                </Typography>
+                <Typography variant='subtitle1'>
+                  {val.fuelLitres.toFixed(2)} Litres
+                </Typography>
+                <Typography variant='subtitle1'>
+                  Mileage: {val.mileage} KMs
+                </Typography>
+              </CardContent>
+            </Collapse>
+          </Card>
+           
+          ))}
+       
           </Grid>
           
         </Grid>
